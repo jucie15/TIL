@@ -8,6 +8,14 @@
 
 3. ##### 프로필에 등록되어있는 태그 목록을 보여주고 추가/수정할 수 있게한다.
 
+
+
+### Refer
+
+- ##### https://django-tagging.readthedocs.io/en/develop/
+
+
+
 ### Model 태그 필드
 
 1. accounts/models.py
@@ -65,12 +73,13 @@
        # 공약 모델
    	# ---- 중략 ----
        tag = TagField() # 공약 태그
+   ```
 
 
 
        def __str__(self):
            return self.title
-
+    
        def get_absolute_url(self):
            return reverse('cast:pledge_detail', args = [self.pk])
    ```
