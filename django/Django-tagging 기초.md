@@ -73,15 +73,12 @@
        # 공약 모델
    	# ---- 중략 ----
        tag = TagField() # 공약 태그
-   ```
-
-
-
+       
        def __str__(self):
-           return self.title
-    
-       def get_absolute_url(self):
-           return reverse('cast:pledge_detail', args = [self.pk])
+          return self.title
+
+      	def get_absolute_url(self):
+          return reverse('cast:pledge_detail', args = [self.pk])
    ```
 
 ### 태그 추가 및 수정하기
@@ -96,6 +93,7 @@
        url(r'^set-tag/$', views.set_tag, name='set_tag'),
    ]
    ```
+
 
 2. ##### 태그 설정 뷰(accounts/views.py)
 
@@ -164,10 +162,9 @@
        # 해당 태그가 포함 되어있는 전체 리스트
        tag = request.GET.get('tag','')
 
-       pledge_list = Pledge.objects.filter(tag__contains=tag) # 공약 리스트
-       contents_list = Contents.objects.filter(tag__contains=tag) # 콘텐츠 리스트
-       congressman_list = CongressMan.objects.filter(tag__contains=tag) # 국회의원 리스트
-
+       pledge_list = TaggedItem.objects.get_by_model(Pledge, tag) # 공약 리스트
+       contents_list = TaggedItem.objects.get_by_model(Contents, tag) # 콘텐츠 리스트
+       congressman_list = TaggedItem.objects.get_by_model(Congressman, tag) # 국회의원 리스트
        context = {}
        context['contents_list'] = contents_list
        context['pledge_list'] = pledge_list

@@ -16,6 +16,23 @@
 - [django-pagiation](https://cjh5414.github.io/django-pagination/)
 
 
+### Dependencies
+
+We don’t need anything other than Django installed in the back-end. For this example you will need jQuery and Waypoints.
+
+- [jQuery 3.1.1](https://jquery.com/download/)
+- [Waypoints](http://imakewebthings.com/waypoints/)
+
+After downloading the dependencies, include the following scripts in your template:
+
+##### **layout.html**
+
+```html
+<script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+<script src="{% static 'js/jquery.waypoints.min.js' %}"></script>
+<script src="{% static 'js/infinite.min.js' %}"></script>
+```
+
 
 ### Django Pagination & infinity scrolling
 
@@ -49,7 +66,7 @@ def congressman_list(request):
 
 
 - ##### Congressman.html
-{% raw %}
+  {% raw %}
 ```Html
 {% extends "pledge/layout.html" %}
 
@@ -114,7 +131,7 @@ def congressman_list(request):
     $ pip install django-el-pagination
     ```
 
-  -   ##### settings.py
+  - ##### settings.py
 
       ```python
       INSTALLED_APPS = [
