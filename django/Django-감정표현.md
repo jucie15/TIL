@@ -21,6 +21,8 @@ url(r'^contents-emotion/(?P<contents_pk>\d+)/$', views.contents_emotion, name='c
 
 - ##### 감정표현을 위한 유저와 컨텐츠간의 M:N 관계를 위해 `ContentsEmotion` 모델 추가
 
+- ##### 컨텐츠 모델에 감정표현 갯수 카운팅 함수 추가
+
 ```python
 class ContentsEmotion(models.Model):
     # 컨텐츠내 감정 표현 관계 모델
@@ -41,6 +43,21 @@ class ContentsEmotion(models.Model):
 
     def __str__(self):
         return self.get_name_display() # name 필드의 Choice Value 값을 보여 준다.
+    
+    
+class Contents(models.Model):
+    # 컨텐츠(뉴스/영상) 모델
+	
+    [...]
+    
+    @property
+    def get_count_emotion(self):
+        # 해당 컨텐츠의 각 감정들의 개수 카운트 @property 장식자를 통해 템플릿에서 쉽게 접근하게 한다.
+        total_number = {} # 각 감정들의 개수를 담을 dic 변수
+        for idx in range(1,7):
+            # 각 감정들 별로 개수 카운트
+            total_number[idx] = ContentsEmotion.objects.filter(contents_id=self.id, name=idx).count()
+        return total_number
 ```
 
 
@@ -63,9 +80,11 @@ def contents_emotion(request, contents_pk):
         user = request.user # 현재 유저의 정보를 받아온다.
         contents = get_object_or_404(Contents, pk=contents_pk) # 현재 콘텐츠 인스턴스 생성
         emotion_name = request.GET.get('emotion_name','') # url GET 정보에 담겨있는 감정정보를 받아온다.
+        before_emotion_name = ''
         if user.contents_emotion_set.filter(contents=contents).exists():
             # 해당 컨텐츠에 감정 표현을 이미 해놓은 경우
             user_emotion = user.contents_emotion_set.get(contents=contents) # 해당유저가 컨텐츠에 해놓은 감정표현을 정보를 받아와
+            before_emotion_name = user_emotion.name
             if user_emotion.name == emotion_name:
                 # 같은 감정을 한번 더누르면 삭제.
                 ContentsEmotion.objects.filter(contents=contents, user=user).delete() # 인스턴스 삭제
@@ -80,9 +99,13 @@ def contents_emotion(request, contents_pk):
                 contents=contents,
                 name=emotion_name,
             )
+        emotion_count = ContentsEmotion.objects.filter(contents=contents, name=emotion_name).count()
+        before_emotion_count = ContentsEmotion.objects.filter(contents=contents, name=before_emotion_name).count()
         context = {}
         context['status'] = 'success'
-
+        context['emotion_count'] = emotion_count
+        context['before_emotion_name'] = before_emotion_name
+        context['before_emotion_count'] = before_emotion_count
     else:
         context = {}
         context['message'] = '잘못된 접근입니다.'
@@ -99,20 +122,25 @@ def contents_emotion(request, contents_pk):
 - ##### 간단하게 기능만 보기위해 버튼 6개 추가
 
   ```html
-  <button type="button" class="emobtn btn btn-primary" id="disgusting" name="역겨워요" value="1" style="color:white;">역겨워요</button>
-  <button type="button" class="emobtn btn btn-primary" id="surprising" name="놀라워요" value="2" style="color:white;">놀라워요</button>
-  <button type="button" class="emobtn btn btn-primary" id="glad" name="기뻐요" value="3" style="color:white;">기뻐요</button>
-  <button type="button" class="emobtn btn btn-primary" id="sad" name="슬퍼요" value="4" style="color:white;">슬퍼요</button>
-  <button type="button" class="emobtn btn btn-primary" id="angry" name="화나요" value="5" style="color:white;">화나요</button>
-  <button type="button" class="emobtn btn btn-primary" id="nice" name="멋져요" value="6" style="color:white;">멋져요</button>
+  <ul class="emotion_box">
+    <li class="emotion"><a class="emobtn" role="button" id="glad" name="기뻐요" value="3">
+      <img src="{% static 'cast/img/glad.png' %}" alt="" style="width:23px;"><span class="emotion_name">기뻐요</span><span class="emotion_score" id="emo_3">{{ contents.get_count_emotion.3 }}</span></a></li>
+    <li class="emotion"><a class="emobtn" role="button" id="disgusting" name="역겨워요" value="1">
+      <img src="{% static 'cast/img/discusting.png' %}" alt="" style="width:23px;"><span class="emotion_name">역겨워요</span><span class="emotion_score" id="emo_1">{{ contents.get_count_emotion.1 }}</span></a></li>
+    <li class="emotion"><a class="emobtn" role="button" id="angry" name="화나요" value="5">
+      <img src="{% static 'cast/img/angry.png' %}" alt="" style="width:23px;"><span class="emotion_name">화나요</span><span class="emotion_score" id="emo_5">{{ contents.get_count_emotion.5 }}</span></a></li>
+    <li class="emotion"><a class="emobtn" role="button" id="nice" name="멋져요" value="6">
+      <img src="{% static 'cast/img/nice.png' %}" alt="" style="width:23px;"><span class="emotion_name">멋져요</span><span class="emotion_score" id="emo_6">{{ contents.get_count_emotion.6 }}</span></a></li>
+    <li class="emotion"><a class="emobtn" role="button" id="sad" name="슬퍼요" value="4">
+      <img src="{% static 'cast/img/sad.png' %}" alt="" style="width:23px;"><span class="emotion_name">슬퍼요</span><span class="emotion_score" id="emo_4">{{ contents.get_count_emotion.4 }}</span></a></li>
+    <li class="emotion"><a class="emobtn"role="button" id="surprising" name="놀라워요" value="2">
+      <img src="{% static 'cast/img/surprising.png' %}" alt="" style="width:23px;"><span class="emotion_name">놀라워요</span><span class="emotion_score" id="emo_2">{{ contents.get_count_emotion.2 }}</span></a></li>
+  </ul>
   ```
 
 - ##### ajax 요청을 보내 처리한다.
 
   ```javascript
-  <script type="text/javascript">
-      // 좋아요 버튼 처리
-      // 버튼 클릭 > ajax통신 (like url로 전달) > views의 like 메소드에서 리턴하는 값 전달받기 > 성공시 콜백 호출
       $('.emobtn').click(function(){
           var emotion_name = $(this).attr('value'); // 클릭한 요소의 attribute 중 value의 값을 가져온다.
 
@@ -121,13 +149,15 @@ def contents_emotion(request, contents_pk):
               data: {'csrfmiddlewaretoken': '{{ csrf_token }}'}, // 서버로 데이터를 전송할 때 이 옵션을 사용한다.
               dataType: "json", // 서버측에서 전송한 데이터를 어떤 형식의 데이터로서 해석할 것인가를 지정한다. 없으면 알아서 판단한다.
 
-              success: function(response){
+              success: function(data){
                   // 요청이 성공했을 경우 눌려있는 버튼 모양을 바꿔준다.
+                  $('#emo_' + emotion_name).text(data.emotion_count)
+                  $('#emo_' + data.before_emotion_name).text(data.before_emotion_count)
               },
               error:function(error){
                   // 요청이 실패했을 경우
+                  console.log(error.status + error.message)
               }
           });
       });
-  </script>
   ```
