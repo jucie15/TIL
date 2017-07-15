@@ -14,7 +14,7 @@ git commit -m '커밋 메시지'
 # 스테이지 영역에 기록된 시점들 파일을 실제 리포지토리 변경 내역에 반영.
 
 git commit --amend
-# 바로 전에 작성했던 커밋 메세지 수정
+# 바로 전에 작성했던 커밋에 덮어쓰기(메시지 수정 가능)
 
 git commit -am "message"
 # add, commit 한번에 하기
@@ -40,11 +40,17 @@ git diff
 git branch
 # 브랜치 목록 표시
 
+git branch -va
+# 리모트 브랜치 포함 모든 브랜치 목록 표시
+
 git checkout temp
 # temp branch로 이동
 
 git checkout -b temp
 # temp branch생성 후 이동
+
+git remote update
+# 리모트 정보가 필요할 때
 
 git remote add origin https://github.com/jucie15/Piggies.git
 # 주소의 저장소를 원격 저장소의 주소로 지정
