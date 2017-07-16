@@ -19,6 +19,9 @@ git commit --amend
 git commit -am "message"
 # add, commit 한번에 하기
 
+git reset HEAD~2
+# 2개 전의 커밋으로 되돌리기
+
 git reset --hard HEAD^값 or 커밋로그 값
 # HEAD, 스테이지, Working tree를 특정 커밋으로 복원.
 
@@ -33,6 +36,9 @@ git push -u origin
 
 git push -u origin master
 # 현재 레포에 있는 브랜치를 원격 레포의 master 브랜치로 설정
+
+git push origin +master 
+# +를 붙여주면 정보 손실 있어도 무시하고 푸쉬한다.
 
 git diff
 # working tree, 스테이지 영역, 최신 커밋 사이 변경 확인
