@@ -43,11 +43,20 @@ git push origin +master
 git diff
 # working tree, 스테이지 영역, 최신 커밋 사이 변경 확인
 
+git fetch --all
+# 모든 정보 받아오기
+
+git fetch origin
+# 리모트 정보와 동기화
+
 git branch
 # 브랜치 목록 표시
 
 git branch -va
 # 리모트 브랜치 포함 모든 브랜치 목록 표시
+
+git push origin --delete <branch>
+# 리모트에 있는 <branch> 삭제
 
 git checkout temp
 # temp branch로 이동
