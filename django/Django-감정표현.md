@@ -50,14 +50,10 @@ class Contents(models.Model):
 	
     [...]
     
-    @property
-    def get_count_emotion(self):
-        # 해당 컨텐츠의 각 감정들의 개수 카운트 @property 장식자를 통해 템플릿에서 쉽게 접근하게 한다.
-        total_number = {} # 각 감정들의 개수를 담을 dic 변수
-        for idx in range(1,7):
-            # 각 감정들 별로 개수 카운트
-            total_number[idx] = ContentsEmotion.objects.filter(contents_id=self.id, name=idx).count()
-        return total_number
+        def get_count_emotion(self, emotion):
+        # 해당 컨텐츠의 각 감정들의 개수 카운트
+        emotion_count = ContentsEmotion.objects.filter(contents_id=self.id, name=emotion).count()
+        return emotion_count
 ```
 
 
@@ -117,24 +113,46 @@ def contents_emotion(request, contents_pk):
 
 
 
+### 커스텀 템플릿 태그(cast/templatetags/cast_extras.py)
+
+- ##### 템플릿에서 함수에 인자를 넘겨주기 위해 커스텀 템플릿 태그 정의
+
+```python
+from django import template
+from cast.models import Contents
+
+
+register = template.Library()
+
+@register.filter(name='emotion_count')
+def emotion_count(objects, emotion):
+    return objects.get_count_emotion(emotion)
+
+```
+
 ### 템플릿(cast/contents_detail.html)
+
+- ##### 모델에 있는 함수를 호출해주는 커스텀 템플릿 태그를 추가해 사용함.
+
+  `{{ contents|emotion_count:"3" }}`
 
 - ##### 간단하게 기능만 보기위해 버튼 6개 추가
 
   ```html
+  {% load cast_extras %}
   <ul class="emotion_box">
     <li class="emotion"><a class="emobtn" role="button" id="glad" name="기뻐요" value="3">
-      <img src="{% static 'cast/img/glad.png' %}" alt="" style="width:23px;"><span class="emotion_name">기뻐요</span><span class="emotion_score" id="emo_3">{{ contents.get_count_emotion.3 }}</span></a></li>
+      <img src="{% static 'cast/img/glad.png' %}" alt="" style="width:23px;"><span class="emotion_name">기뻐요</span><span class="emotion_score" id="emo_3">{{ contents|emotion_count:"3" }}</span></a></li>
     <li class="emotion"><a class="emobtn" role="button" id="disgusting" name="역겨워요" value="1">
-      <img src="{% static 'cast/img/discusting.png' %}" alt="" style="width:23px;"><span class="emotion_name">역겨워요</span><span class="emotion_score" id="emo_1">{{ contents.get_count_emotion.1 }}</span></a></li>
+      <img src="{% static 'cast/img/discusting.png' %}" alt="" style="width:23px;"><span class="emotion_name">역겨워요</span><span class="emotion_score" id="emo_1">{{ contents|emotion_count:"1" }}</span></a></li>
     <li class="emotion"><a class="emobtn" role="button" id="angry" name="화나요" value="5">
-      <img src="{% static 'cast/img/angry.png' %}" alt="" style="width:23px;"><span class="emotion_name">화나요</span><span class="emotion_score" id="emo_5">{{ contents.get_count_emotion.5 }}</span></a></li>
+      <img src="{% static 'cast/img/angry.png' %}" alt="" style="width:23px;"><span class="emotion_name">화나요</span><span class="emotion_score" id="emo_5">{{ contents|emotion_count:"5" }}</span></a></li>
     <li class="emotion"><a class="emobtn" role="button" id="nice" name="멋져요" value="6">
-      <img src="{% static 'cast/img/nice.png' %}" alt="" style="width:23px;"><span class="emotion_name">멋져요</span><span class="emotion_score" id="emo_6">{{ contents.get_count_emotion.6 }}</span></a></li>
+      <img src="{% static 'cast/img/nice.png' %}" alt="" style="width:23px;"><span class="emotion_name">멋져요</span><span class="emotion_score" id="emo_6">{{ contents|emotion_count:"6" }}</span></a></li>
     <li class="emotion"><a class="emobtn" role="button" id="sad" name="슬퍼요" value="4">
-      <img src="{% static 'cast/img/sad.png' %}" alt="" style="width:23px;"><span class="emotion_name">슬퍼요</span><span class="emotion_score" id="emo_4">{{ contents.get_count_emotion.4 }}</span></a></li>
+      <img src="{% static 'cast/img/sad.png' %}" alt="" style="width:23px;"><span class="emotion_name">슬퍼요</span><span class="emotion_score" id="emo_4">{{ contents|emotion_count:"4" }}</span></a></li>
     <li class="emotion"><a class="emobtn"role="button" id="surprising" name="놀라워요" value="2">
-      <img src="{% static 'cast/img/surprising.png' %}" alt="" style="width:23px;"><span class="emotion_name">놀라워요</span><span class="emotion_score" id="emo_2">{{ contents.get_count_emotion.2 }}</span></a></li>
+      <img src="{% static 'cast/img/surprising.png' %}" alt="" style="width:23px;"><span class="emotion_name">놀라워요</span><span class="emotion_score" id="emo_2">{{ contents|emotion_count:"2" }}</span></a></li>
   </ul>
   ```
 
