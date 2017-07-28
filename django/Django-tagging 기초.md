@@ -10,9 +10,24 @@
 
 
 
+
 ### Refer
 
 - ##### https://django-tagging.readthedocs.io/en/develop/
+
+
+
+
+### SETTING
+
+- ##### `FORCE_LOWERCASE_TAGS`  모든 태그를 소문자로 `default=False`
+
+- ##### `MAX_TAG_LENGTH` 최대 글자 수 `default=50`
+
+```python
+FORCE_LOWERCASE_TAGS = True # 모든 태그 이름을 소문자로
+MAX_TAG_LENGTH = 2 # 최대 글자 개수 제한
+```
 
 
 
@@ -21,27 +36,24 @@
 1. accounts/models.py
 
    ```python
+   from tagging.registry import register
+
    class Profile(models.Model):
        # 사용자 추가 정보 모델
-       SEX_CHOICES = (
-           ('1','MALE'),
-           ('2','FEMALE'),
-       ) # 성별 종류 명시
 
-       user = models.OneToOneField(settings.AUTH_USER_MODEL, related_name='profile_set') # AUTH_USER 모델과 1:1 관계 설장
-       sex = models.CharField(max_length=2, choices=SEX_CHOICES, verbose_name='성별') # 성별
-       birth = models.CharField(max_length=16, null=True, verbose_name='생년월일', validators=[birth_validator]) # 생년월일
-       city = models.CharField(max_length=16, null=True, verbose_name='시/도') # 시/구
-       district = models.CharField(max_length=8, null=True, verbose_name='구') # 구
-       tag = TagField() # 관심사 태그
+       [...]
 
        def __str__(self):
            return  self.user.username
+
+   register(Profile)
    ```
 
 2. cast/models.py
 
    ```python
+   from tagging.registry import register
+
    class Contents(models.Model):
        # 컨텐츠(뉴스/영상) 모델
        # ---- 중략 ----
@@ -55,7 +67,9 @@
        def __str__(self):
            return self.title
 
-   class CongressMan(models.Model):
+   register(Contents)
+       
+   class Congressman(models.Model):
        # 국회의원 모델
        # ---- 중략 ----
        tag = TagField() # 국회의원 태그
@@ -69,6 +83,8 @@
        def __str__(self):
            return self.name
 
+   register(Congressman)    
+       
    class Pledge(models.Model):
        # 공약 모델
    	# ---- 중략 ----
@@ -79,7 +95,11 @@
 
       	def get_absolute_url(self):
           return reverse('cast:pledge_detail', args = [self.pk])
+
+   register(Pledge)
    ```
+
+
 
 ### 태그 추가 및 수정하기
 
@@ -90,7 +110,7 @@
    from accounts import views
 
    urlpatterns = [
-       url(r'^set-tag/$', views.set_tag, name='set_tag'),
+       url(r'^ajax/add/tag/$', views.ajax_add_tag, name='ajax_add_tag'),
    ]
    ```
 
@@ -98,51 +118,74 @@
 2. ##### 태그 설정 뷰(accounts/views.py)
 
    ```python
-   def set_tag(request):
-       # 태그 추가/수정 페이지
+   def ajax_add_tag(request):
+       # 태그 추가 버튼 클릭시
+       if request.is_ajax():
+           # ajax 요청시
+           tag = request.GET.get('tag','')
+           profile = request.user.profile
 
-       user = request.user.profile_set # 현재 유저의 프로필 정보
-       if request.method == 'POST':
-           user.tag = request.POST.get('tag') # 요청 유저의 태그 정보를 받아온 태그 정보로 저장
-           user.save() # 디비에 프로필 정보 저장
-           return redirect('accounts:profile')
+           Tag.objects.add_tag(profile, tag) # 해당 인스턴스에 태그 추가
+
+           data = json.dumps({
+               'status': 'success',
+               }) # json 형식으로 파싱
+
        else:
-           form = TagForm(instance = user) # 유저 정보를 받아와 폼 인스턴스 생성
-       return render(request, 'accounts/tag_form.html', {
-           'form': form,
-           })
+           data = json.dumps({
+               'status': 'fail',
+               }) # json 형식으로 파싱
+
+       mimetype = 'application/json'
+       return HttpResponse(data, mimetype
    ```
 
-3. ##### 태그 폼 (accounts/forms.py)
+3. ##### 태그 추가 템플릿 (accounts/tag_form.html)
 
-   ```python
-   class TagForm(forms.ModelForm):
-       class Meta:
-           model = Profile
-           fields = ['tag']
-   ```
+   1. ##### HTML
 
-4. ##### 태그 설정 간단한 템플릿 (accounts/tag_form.html)
+      ```Html
+      <div class="add-tag-box">
+        <input type="text" id="add-tag-value" placeholder="태그를 추가해주세요.">
+        <a id="add-tag"><span class="upload-btn">추가</span></a>
+        <span class="cancel-btn"><i class="fa fa-times" aria-hidden="true"></i></span>
+      </div>
+      	<span class="add-tag-btn"><i class="fa fa-plus" aria-hidden="true"></i>태그추가</span>
+      ```
 
-   ```html
-   {% raw %}
-     {% extends 'cast/layout.html' %}
+   2. ##### JavaScrip
 
-     {% block content %}
-         <form action="" method="post">
-             {% csrf_token %}
-                     <script type="text/javascript">
-             </script>
-             <table>
-                 {{ form.as_table }}
-             </table>
-             <input type="submit">
-         </form>
-     {% endblock %}
-   {% endraw %}
-   ```
+      ```javascript
+      <script>
+          $('#add-tag').click(function(){
+              // 태그 추가 버튼 클릭시
+              tag = $('#add-tag-value').val()
 
-##### 태그가 등록된 목록 보여주기
+              $.ajax({
+                  type: "GET", // GET 요청으로 한다.
+                  url: "{% url 'accounts:ajax_add_tag' %}?tag=" + tag, // 통신할 url을 지정한다.
+                  dataType: "json", // 서버측에서 전송한 데이터를 어떤 형식의 데이터로서 해석할 것인가를 지정한다. 없으면 알아서 판단한다.
+
+                  success: function(data){
+                      // 요청이 성공했을 경우 눌려있는 버튼 모양을 바꿔준다.
+                      $("#add-tag-value").before("<span class='tag'><a href='{% url 'cast:tagged_list' %}?tag="+tag+"'>"+tag+"</a></span>");
+                      $('.add-tag-box').css('display','none');
+                      $('.add-tag-btn').css('display','inline');
+                      //댓글 추가 버튼 위치도 변경
+                      $('#cd-upload-btn').css('top','99%');
+                  },
+                  error:function(error){
+                      // 요청이 실패했을 경우
+                      console.log(error)
+                  }
+              });
+          });
+      </script>
+      ```
+
+
+
+### 태그가 등록된 목록 보여주기
 
 1. ##### Url conf (cast/urls.py)
 
@@ -221,3 +264,16 @@
      {% endblock %}
    {% endraw %}
    ```
+
+
+
+### 태그 목록 정렬하기
+
+- ##### 각 모델에 등록된 태그의 개수별로 정렬
+
+  ```python
+  tag_list = Tag.objects.usage_for_model(Contents, counts=True) # 태그아이템 개수 포함한 리스트
+
+  tag_list.sort(key=lambda tag: tag.count, reverse=True) # 개수 기준 정렬
+  ```
+
