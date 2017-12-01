@@ -1,6 +1,6 @@
 ## GIT 정리
 
-- #### Basic
+- #### Knowledge
 
   - ##### tag
 
@@ -24,7 +24,7 @@
 
 - #### 명령어 정리
 
-```
+```python
 git init
 # 리포지토리 초기화. '.git'폴더 생성. 이 폴더에 현재 폴더와 관련된 관리 정보가 저장. working tree라고 부른다. 변경 내역 등 관리.
 
@@ -90,6 +90,12 @@ git checkout temp
 
 git checkout -b temp
 # temp branch생성 후 이동
+
+git checkout HEAD~1 -> git checkout master
+# 한단계전으로 돌아갔다 오기
+
+git checkout <commit-log>
+# 해당 커밋 상태로 돌아가기
 
 git remote update
 # 리모트 정보가 필요할 때
