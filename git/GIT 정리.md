@@ -6,6 +6,34 @@
 
   - ##### cherrypick
 
+- #### Refer
+
+  - ##### <https://blog.panter.ch/2016/08/31/5-rules-to-git-better.html>
+
+    <https://hackernoon.com/git-merge-vs-rebase-whats-the-diff-76413c117333>
+
+    <http://softwareswirl.blogspot.kr/2009/04/truce-in-merge-vs-rebase-war.html>
+
+    <https://lwn.net/Articles/328436/>
+
+    <http://scottchacon.com/2011/08/31/github-flow.html>
+
+    <http://www.darwinweb.net/articles/the-case-for-git-rebase>
+
+    <https://www.digitalocean.com/community/tutorials/how-to-rebase-and-update-a-pull-request>
+
+    <https://blog.carbonfive.com/2017/08/28/always-squash-and-rebase-your-git-commits/>
+
+    <https://blogg.bekk.no/why-you-should-stop-using-git-rebase-5552bee4fed1>
+
+    <https://blog.mwaysolutions.com/2015/07/23/git-merge-and-rebase-part-2-of-3/>
+
+    <http://www.bitsnbites.eu/a-tidy-linear-git-history/>
+
+    <http://www.bitsnbites.eu/git-history-work-log-vs-recipe/>
+
+    <http://codeinthehole.com/tips/pull-requests-and-other-good-practices-for-teams-using-github/>
+
 - #### Git Flow
 
   1. ##### Refer :
