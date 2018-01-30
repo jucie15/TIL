@@ -1,8 +1,12 @@
-## Git ignore 적용 안될 때
+## Git igonre
 
-- git ignore에 파일명을 추가한 후에도 이미 푸쉬되어 있는 파일들은 지워지지 않는다.
+- ### Refer
 
-  그 때 이 명령어를 사용하면 된다.
+  - ##### [Best-practice](https://github.com/github/gitignore/blob/master/Python.gitignore)
+
+
+- ### Git ignore 적용 안될 때
+  - git ignore에 파일명을 추가한 후에도 이미 푸쉬되어 있는 파일들은 지워지지 않는다.
 
 ```
 git rm --cached . 
