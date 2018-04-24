@@ -62,6 +62,9 @@ git status
 git add 파일명
 # 스테이지 영역(커밋 전 임시 영역)에 파일 추가. 
 
+git add -p 파일명
+# -p 옵션 선택한 파일들의 변경 내역들 중 hunk 단위로 추가
+
 git commit -m '커밋 메시지'
 # 스테이지 영역에 기록된 시점들 파일을 실제 리포지토리 변경 내역에 반영.
 
@@ -70,6 +73,9 @@ git commit --amend
 
 git commit -am "message"
 # add, commit 한번에 하기
+
+git commit -v
+# 커밋시 변경 내역 다시 확인
 
 git reset HEAD~2
 # 2개 전의 커밋으로 되돌리기
@@ -97,6 +103,9 @@ git diff
 
 git diff branch1 branch2
 # working tree, 스테이지 영역, 최신 커밋 사이 변경 확인
+
+git diff --staged
+# stage 영역에 있는 변경 내역들만 확인
 
 git fetch --all
 # 모든 정보 받아오기
